@@ -1,0 +1,42 @@
+<html>    
+	</head>
+	    <title>Scenario Explanation - Energy Flow Optimization</title>
+	    <link rel="stylesheet" type="text/css" href="css/index.css">
+	    <link rel="stylesheet" type="text/css" href="css/examples.css">
+	    <link rel="stylesheet" type="text/css" href="css/scenario.css">
+	    <script type="text/javascript" src="js/jquery.min.js"></script>
+	    <script type="text/javascript" src="js/content.js"></script>
+	</head>
+	<body>
+		<header><h1>Scenario Explanation</h1></header>
+		<br>
+		<div id="navbar">
+			<button class="myButton" id="btnA">Scenario A</button>
+			<button class="myButton" id="btnB">Scenario B</button>
+			<button class="myButton" id="btnC">Scenario C</button>
+			<button class="myButton" id="btnD">Scenario D</button>
+			<button class="myButton" id="btnE">Scenario E</button>
+			<button class="myButton" id="btnF">Scenario F</button>
+		</div>
+		<div>
+			Battery storage system with smaller battery capacity and larger variance of wind power inflow has more peaks of energy storage level with larger expected value of the system operation per day.
+		</div>
+		<div id="content">
+			<h3>Scenario A</h3><br>Small storage capacity (Rj=300 kwh) with small variance of wind power to battery storage N(900,100) under a Beta (α,β) process unmet commitment (kwh):
+			<br><br>
+			Achieve three energy storage peaks under a smaller storage level, and small value of commitment decisions per day. The energy storage peaks are morning, afternoon and midnight of each day.
+			<br><image src='image/scenarioA-zt.png'><br>
+			<image src='image/scenarioA-xti.png'><br> 
+			<image src='image/scenarioA-vt.png'><br>
+		</div>
+		<br>
+		<footer>Copyright © 2015. All rights reserved.</footer> 
+		<script>
+
+			$('#btnA, #btnB, #btnC, #btnD, #btnE, #btnF').click(function(){
+				$('#content').html(getContent(this.id));
+			});
+
+		</script>
+	</body>
+</html>

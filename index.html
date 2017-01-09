@@ -1,0 +1,55 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Energy Flow Optimization</title>
+    <link rel="stylesheet" type="text/css" href="css/index.css">
+    <link rel="stylesheet" type="text/css" href="css/examples.css">
+</head>
+
+<body>
+
+    <h2><b>Energy Flow Optimization for Wind Farm- A Stochastic Dynamic Programming Approach</b></h2>
+    <p>
+        The algorithm of this system is based on day ahead wind commitment, which aims to maximize profit of the energy storage system on specified days, 24 hours. 
+        <br>
+        Users of this system can select their desired system-options to simulate various scenarios of energy flow optimization for wind farm based on stochastic dynamic programming.
+    <br><br>
+        <a href="https://www.linkedin.com/in/jungweihung" target="_blank">Wayne Hung</a> (juh296@psu.edu), <a href="https://tw.linkedin.com/in/veckhsiao" target="_blank">Veck Hsiao</a> (102753014@nccu.edu.tw)
+    <br>
+        Reference paper：Approximate Dynamic Programming for Storage Problems</a>, Lauren A. Hannah, David B. Dunson, Duke University, Durham, NC 27708 USA, 2011.
+    <br><br>
+    <div>    
+        The actual energy commitment of this wind farm, <i>yti</i>, is normal distributed with its mean value equal to 1000 Kwh/hr. And because of the discontinuity and volatility of the wind resource, the power generator decides to use energy storage device to help achieve decided commit energy flow, <i>xti</i>, per hour, every day. <br><br>
+
+        The energy price, <i>pti</i>, is normal distributed with its mean value equal to $0.055/kwh cross <i>t</i> days. The system total revenue is defined as commit energy flow decision, <i>xti</i>, times its price, <i>pti</i>. The commit energy flow decision <i>xti</i> is composed by <i>yti</i>, the actual winds power commitment to client, <i>Δzti</i>, energy storage level changes, and adding energy flow from winds power to battery, and unmet uncertainty. <br><br>
+
+        There is uncertainty of unmet energy with beta random process and 1% energy loses as heat while crossing each hour, therefore, the profit of this energy system in current period is deducted by two future factors <i>fd</i> (energy loses) and <i>fu</i> (unmet) in the next period, which are quantity <i>yd</i> and <i>yu</i> times prices at <i>t</i> day and <i>i</i> hour. And, the energy storage level of the system may not exceed battery capacity and lower than zero. The system owner is aiming to find the max reward each period with consideration of these conditions by backward recursion.<br><br>
+
+        <ul>
+            <li><a href="flow.html" target="_blank">System Flow Chart</a></li>
+            <li><a href="scenario.html" target="_blank">Scenarios Explanation</a></li>
+            <li><a href="demo.html" target="_blank">Demo</a></li>
+        </ul>
+    </div>
+    <br>
+        <h4>Formulation</h4>
+        <div class="formula" id="f2">
+            <image alt="formulation" src="image/formulation2.png">
+        </div>
+    <div>
+        <h4>Subject to：</h4>
+        <image alt="formulation" src="image/subject.png">
+    </div>
+    <!--
+        <div class="formula" id="f3">Subject to<br><br>
+            <image alt="formulation" src="image/formulation3.png">
+        </div>
+    <br><br>
+        <div class="formula" id="f1">
+            <image alt="formulation" src="image/formulation.png">
+        </div>
+    -->
+    <br>
+    <footer>Copyright © 2015. All rights reserved.</footer> 
+</body>
+</html>

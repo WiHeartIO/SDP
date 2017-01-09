@@ -1,0 +1,327 @@
+<html>
+	<head>
+        <title>Demo - Energy Flow Optimization</title>
+    	<link rel="stylesheet" type="text/css" href="css/examples.css">
+    	<link rel="stylesheet" type="text/css" href="css/index.css">
+		<script type="text/javascript" src="js/jstat.min.js"></script>
+	    <script type="text/javascript" src="js/SDP.js"></script>
+	    <script type="text/javascript" src="js/jsapi"></script>
+	    <script type="text/javascript" src="js/graph3d.js"></script>
+	    <script type="text/javascript" src="js/jquery.min.js"></script>
+	    <script type="text/javascript" src="js/jquery.flot.min.js"></script>
+	</head>
+	<body>
+	<br>
+	<h1>Demo</h1>
+	<br>
+    Change Days:
+        <input type="radio" id="day30" class="day"> 30</input> 
+        <input type="radio" id="day60" class="day"> 60</input> 
+        <input type="radio" id="day90" class="day"> 90</input>
+    <br>
+    Capacity(Rj) Selections(Kwt):
+        <input type="radio" id="rj300" class="rj"> 300</input> 
+        <input type="radio" id="rj600" class="rj"> 600</input> 
+        <input type="radio" id="rj900" class="rj"> 900</input>
+    <br>
+    Beta Process for Unmet Commitment in each Period:
+        <input type="radio" id="yu1" class="yu"> α=0.5/β=0.5</input> 
+        <input type="radio" id="yu2" class="yu"> α=5/β=1</input> 
+        <input type="radio" id="yu3" class="yu"> α=1/β=3</input>    
+        <input type="radio" id="yu4" class="yu"> α=2/β=2</input>    
+        <input type="radio" id="yu5" class="yu"> α=2/β=5</input>    
+    <br>
+    Variance of Wind Power (100~500)：
+        <input id="yadd" type="text">
+    <br>
+    <br>
+    <button id='calculate'>Calculate</button>
+    <br>
+    <br>
+    <!-- zt -->
+    <div id="header">
+        <h2>Storage Level Per Day (zt)</h2>
+    </div>
+    <div id="content">
+        <div class="demo-contaier">
+            <div id="zt"></div>
+        </div>
+    </div>
+
+    <!-- xti -->
+    <div id="header">
+        <h2>Commitment Decision (xti)</h2>
+    </div>
+    <div id="content">
+        <div class="demo-contaier">
+            <div id="xti"></div>
+        </div>
+    </div>
+
+    <!-- vt -->
+    <div id="header">
+        <h2>Value Function (vt)</h2>
+    </div>
+    <div id="content">
+        <div class="demo-container">
+            <div id="vt" class="demo-placeholder"></div>
+        </div>
+    </div>
+
+    <!-- theta -->
+    <div id="header">
+        <h2>Slope of Value Function (Theta)</h2>
+    </div>
+    <div id="content">
+        <div class="demo-container">
+            <div id="theta" class="demo-placeholder"></div>
+        </div>
+    </div>
+    <br><br>
+    <footer>Copyright © 2015. All rights reserved.</footer> 
+    <script type="text/javascript">
+     var flag = 0; // used to imply first time or not
+     var day = 0, rj = 0, alphaNew = 0, betaNew = 0, varianceNew = 0; // prepare for user choice
+
+     // Called when the Visualization API is loaded.
+     function draw3D() {
+        var Day = 30;
+        
+        if(flag == 1)
+            Day = day;        
+
+        // Create and populate a data table.
+        ztData = new google.visualization.DataTable();
+        xtiData = new google.visualization.DataTable();
+        ztData.addColumn('number', 'Day');
+        ztData.addColumn('number', 'Hour');
+        ztData.addColumn('number', 'Kwh');            
+        xtiData.addColumn('number', 'Day');
+        xtiData.addColumn('number', 'Hour');
+        xtiData.addColumn('number', 'Kwh');
+
+        // create some nice looking data with sin/cos
+        var steps = 50;  // number of datapoints will be steps*steps
+        var axisMax = 314;
+        var axisStep = axisMax / steps;
+
+        for(var T = 1; T<=Day; T++)
+            for(var i=1; i<=24; i++){                                          
+                ztData.addRow([T, i, zt[T-1][i-1]]);
+                xtiData.addRow([T, i, xti[T-1][i-1]]);
+            }
+
+        // specify options
+        var options = {
+            width:  "1000px",
+            height: "600px",
+            style: "bar",
+            showPerspective: true,
+            showGrid: true,
+            showShadow: false,
+            keepAspectRatio: true,
+            verticalRatio: 0.5,
+            //tooltip: true // mouse hovers showing value, this only show (x:.., y:.., z:..)
+            tooltip: function(d){
+                return "Day:" + d.x + ", Hour:" + d.y + ", Kwh:" + d.z
+            }
+        };
+
+        // Instantiate our graph object.
+        ztGraph = new links.Graph3d(document.getElementById('zt')); 
+        xtiGraph = new links.Graph3d(document.getElementById('xti'));
+        // plotting
+        ztGraph.draw(ztData, options);            
+        xtiGraph.draw(xtiData, options);                    
+        
+        /* Just re-call draw3D() instead.
+        if(flag == 0){
+            ztGraph.draw(ztData, options);            
+            xtiGraph.draw(xtiData, options);                    
+        }
+        else{
+            ztGraph.redraw(ztData);
+            xtiGraph.redraw(xtiData); 
+         }
+         */
+
+    } // end of draw3D
+
+    function plotting(){   
+        var Day = 30;
+        if(flag == 1)
+            Day = day;
+        
+
+        /******* Draw zt and xti graph (3D) *******/
+        var ztData = null;
+        var xtiData = null;
+        var ztGraph = null;
+        var xtiGraph = null;
+
+        google.load("visualization", "1");
+
+        /* Set callback to run when API is loaded 
+         * This only runs on first time when loaded, to redraw, there is an API "redraw(data)".
+         * I reach redraw goal by calling draw3D() again after calling plotting()
+         */
+        google.setOnLoadCallback(draw3D);
+
+        /******* Draw vt and theta (2D) *******/
+         $(function() {
+
+            $("<div id='tooltip2D'></div>").css({
+                position: "absolute",
+                //display: "none",
+                border: "1px solid #fdd",
+                padding: "2px",
+                "background-color": "#fee",
+                opacity: 0.80
+            }).appendTo("body");
+
+            var vtData = [], thetaData = [];
+            for(var i=1; i<=Day; i++){
+                vtData.push([i, vt[i-1]]);
+                thetaData.push([i, theta[i-1]])
+            }
+            
+            var plotSetting = {
+                series: {
+                    lines: {
+                        show: true
+                    },
+                    points:{
+                        show: true
+                    },
+                },
+                grid: {
+                    hoverable: true
+                }
+            }; 
+
+            // plotting graph
+            $.plot("#vt", [vtData], plotSetting);
+            $.plot("#theta", [thetaData], plotSetting);
+
+            //append tooltip
+            $("#vt").bind("plothover", function(event, pos, item){
+                if(item){
+                    var x = item.datapoint[0].toFixed(2),
+                        y = item.datapoint[1].toFixed(2);
+
+                        $("#tooltip2D").html("Day:" + parseInt(x) + ", Value:" + y)
+                            .css({top: item.pageY+5, left: item.pageX+5})
+                            .fadeIn(200);
+                }
+                else{
+                    $("#tooltip2D").hide();
+                }
+            });
+            $("#theta").bind("plothover", function(event, pos, item){
+                if(item){
+                    var x = item.datapoint[0].toFixed(2),
+                        y = item.datapoint[1].toFixed(2);
+
+                        $("#tooltip2D").html("Day:" + parseInt(x) + ", Value:" + y)
+                            .css({top: item.pageY+5, left: item.pageX+5})
+                            .fadeIn(200);
+                }
+                else{
+                    $("#tooltip2D").hide();
+                }
+            });
+
+        });
+     } // end of functon plotting
+
+     /* First time calculating and plotting after page loaded */
+     sdp(0, 0, 0, 0, 0, flag);
+     plotting();
+
+     /****** Mutual exclusive of same class button choosing *******/
+    $("input[class=day]").click(function() {
+        var $this = $(this), 
+            wasChecked = $this.attr("checked") === "checked";
+        $("input[class=day]:checked").removeAttr("checked");
+        if (wasChecked) {
+            $this.attr("checked", "checked");
+        }
+    });
+
+    $("input[class=rj]").click(function() {
+        var $this = $(this), 
+            wasChecked = $this.attr("checked") === "checked";
+        $("input[class=rj]:checked").removeAttr("checked");
+        if (wasChecked) {
+            $this.attr("checked", "checked");
+        }
+    });
+
+    $("input[class=yu]").click(function() {
+        var $this = $(this), 
+            wasChecked = $this.attr("checked") === "checked";
+        $("input[class=yu]:checked").removeAttr("checked");
+        if (wasChecked) {
+            $this.attr("checked", "checked");
+        }
+    });
+     /****** End of mutual exclusive of same class button choosing *******/
+
+     /* User finishes choosing and click calculate button */
+     $('#calculate').on('click', function(){
+
+        /* Get days */
+        if($("#day30").prop("checked") == true)
+            day = 30;
+        else if($("#day60").prop("checked") == true)
+            day = 60;
+        else if($("#day90").prop("checked") == true)
+            day = 90;
+
+        /* Get rj */
+        if($("#rj300").prop("checked") == true)
+            rj = 300;
+        else if($("#rj600").prop("checked") == true)
+            rj = 600;
+        else if($("#rj900").prop("checked") == true)
+            rj = 900;        
+
+        /* Get yu */
+        if($("#yu1").prop("checked") == true){
+            alphaNew = 0.5;
+            betaNew = 0.5;
+        }
+        else if($("#yu2").prop("checked") == true){
+            alphaNew = 5;
+            betaNew = 1;
+        }
+        else if($("#yu3").prop("checked") == true){
+            alphaNew = 1;
+            betaNew = 3;
+        }
+        else if($("#yu4").prop("checked") == true){
+            alphaNew = 2;
+            betaNew = 2;
+        }
+        else if($("#yu5").prop("checked") == true){
+            alphaNew = 2;
+            betaNew = 5;
+        }
+
+        /* Get yadd */
+        varianceNew = $("#yadd").val();
+        if(varianceNew < 100 || varianceNew > 500)
+            alert('Please input value in range from 100 to 500.')
+        else{
+            flag = 1;            
+            sdp(day, rj, alphaNew, betaNew, varianceNew, flag);
+            plotting();
+            draw3D();
+        }
+     }); // end of calculate button
+
+     
+    </script>
+
+	</body>
+</html>

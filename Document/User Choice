@@ -1,0 +1,14 @@
+
+Day:
+ => [30, 120, 365]
+Rj:  
+ => 300, 600, 900 
+
+
+yu[T+1][i] = jStat.beta.sample(alpha, beta) 
+	=> alpha, beta USER CHOICE
+	[{0.5, 0.5}, {5, 1}, {1, 3}, {2, 2}, {2, 5}]
+
+yadd[T][i] = jStat.max([900 + variable*parseFloat(jStat.rand(1)), 0]);
+	=> variable USER CHOICE
+	=> input value: 100 ~ 500
